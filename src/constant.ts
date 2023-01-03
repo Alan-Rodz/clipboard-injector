@@ -9,5 +9,4 @@ export const AppColors = {
   WHITE:   '#FFFFFF',
   WHITE_2:   '#FBF8F4EC',
   BLACK_1: '#191919',
-  BLACK_2: '#222222',
 };

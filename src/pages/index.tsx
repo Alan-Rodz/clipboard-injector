@@ -56,10 +56,10 @@ const MainPage = () => {
 
           <Center padding='2em' gap='5em'>
             <Button {...buttonProps}>
-              Copy as Text
+              {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
             </Button>
             <Button {...buttonProps}>
-              Copy as HTML
+              {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
             </Button>
           </Center>
 
