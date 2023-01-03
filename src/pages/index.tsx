@@ -1,5 +1,6 @@
 import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea } from '@chakra-ui/react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRef, useState, ChangeEventHandler } from 'react';
 
 import { AppColors, HOVERABLE_CLASS } from '../constant';
@@ -35,13 +36,13 @@ const MainPage = () => {
 
   const handleSetClipboard = (as: 'text' | 'html') => {
     const { current } = outputDivRef;
-    if(!current) return/*not set yet*/;
-    if(!textAreaValue) {
+    if (!current) return/*not set yet*/;
+    if (!textAreaValue) {
       toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
       return/*no value*/;
     } /* else -- value exists */
 
-    if(as === 'text') { navigator.clipboard.writeText(textAreaValue); } 
+    if (as === 'text') { navigator.clipboard.writeText(textAreaValue); }
     else { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]); }
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
@@ -108,11 +109,14 @@ const MainPage = () => {
                 outline={`1px solid ${AppColors.WHITE_2}`}
                 borderRadius='16px'
               >
-                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: textAreaValue.length ? textAreaValue : '<div>The rendered Text or HTML will appear here</div>' }}/>
+                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: textAreaValue.length ? textAreaValue : '<div>The rendered Text or HTML will appear here</div>' }} />
               </Box>
             </Box>
           </Flex>
         </Box>
+        <Center>
+          <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
+        </Center>
       </Box>
     </>
   )

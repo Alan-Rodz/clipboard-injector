@@ -1,6 +1,6 @@
 # Clipboard Injector
 
-A web tool to explicitly set the clipboard contents.
+A web tool to explicitly set content into the clipboard as Text or HTML
 
 Inspired by [Clipboard Inspector](https://github.com/evercoder/clipboard-inspector)
 
@@ -11,4 +11,4 @@ cd clipboard-injector
 npm install
 npm run dev
 ```
-defaults to `localhost:3000`  
+defaults to `localhost:3000`
