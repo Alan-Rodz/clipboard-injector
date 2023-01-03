@@ -177,7 +177,7 @@ const MainPage = () => {
             </Box>
           </Flex>
         </Box>
-        <Center>
+        <Center marginBottom='1em'>
           <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
         </Center>
       </Box >
