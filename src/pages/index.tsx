@@ -1,4 +1,4 @@
-import { Box, Button, ButtonProps, Center, Text, Textarea, useBreakpointValue } from '@chakra-ui/react';
+import { Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea, useBreakpointValue } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useState, ChangeEventHandler } from 'react';
 
@@ -12,6 +12,11 @@ const buttonProps: Partial<ButtonProps> = {
   backgroundColor: AppColors.PURPLE,
   _active: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE_2 },
   _hover: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
+}
+
+const containerProps: Partial<BoxProps> = {
+  padding: '1em',
+  flexBasis: '50%',
 }
 
 // == Component ===================================================================
@@ -42,7 +47,7 @@ const MainPage = () => {
         color={AppColors.WHITE}
         backgroundColor={AppColors.BLACK_1}
       >
-        <Box padding='4em'>
+        <Box padding='2em'>
           <Text
             padding='0.25em'
             backgroundColor={AppColors.PURPLE}
@@ -53,18 +58,41 @@ const MainPage = () => {
           >
             Clipboard Injector
           </Text>
-
-          <Center padding='2em' gap='5em'>
-            <Button {...buttonProps}>
-              {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
-            </Button>
-            <Button {...buttonProps}>
-              {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
-            </Button>
-          </Center>
-
-          <Textarea value={textAreaValue} onChange={handleTextAreaChange} />
-
+        </Box>
+        <Box padding='2em'>
+          <Flex
+            backgroundColor={AppColors.BLACK_2}
+            borderRadius='16px'
+            flexDir={useBreakpointValue({ base: 'column', md: 'row' })}
+            minHeight={useBreakpointValue({ base: '', md: '60vh' })}
+          >
+            <Box {...containerProps}>
+              <Center padding='2em' gap='5em'>
+                <Button {...buttonProps}>
+                  {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
+                </Button>
+                <Button {...buttonProps}>
+                  {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
+                </Button>
+              </Center>
+              <Textarea
+                value={textAreaValue}
+                onChange={handleTextAreaChange}
+                height='70%'/*T&E*/
+              />
+            </Box>
+            <Box {...containerProps}>
+              <Box
+                padding='1em'
+                height='100%'
+                overflow='auto'
+                outline={`1px solid ${AppColors.WHITE_2}`}
+                borderRadius='16px'
+              >
+                The copied contents will be displayed here
+              </Box>
+            </Box>
+          </Flex>
         </Box>
       </Box>
     </>
