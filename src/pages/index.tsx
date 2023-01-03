@@ -1,5 +1,7 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
 import Head from 'next/head';
+
+import { AppColors } from '../constant';
 
 // ********************************************************************************
 const MainPage = () => {
@@ -18,10 +20,22 @@ const MainPage = () => {
         justifyContent='space-between'
         overflowX='auto'
         overflowY='auto'
-        color={'white'}
-        backgroundColor={'black'}
+        color={AppColors.WHITE}
+        backgroundColor={AppColors.BLACK_1}
       >
-        test
+        <Box padding='4em'>
+          <Text
+            padding='0.25em'
+            backgroundColor={AppColors.PURPLE}
+            borderRadius='16px'
+            width='fit-content'
+            fontSize={useBreakpointValue({ base: '1.5em', md: '2.5em' })}
+            fontWeight='bold'
+          >
+            Clipboard Injector
+          </Text>
+
+        </Box>
       </Box>
     </>
   )
