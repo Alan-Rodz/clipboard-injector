@@ -41,12 +41,8 @@ const MainPage = () => {
       return/*no value*/;
     } /* else -- value exists */
 
-    window.getSelection()/*guaranteed to exist*/!.removeAllRanges();
-    let range = document.createRange();
-    range.selectNode(current);
-    window.getSelection()/*guaranteed to exist*/!.addRange(range);
-    document.execCommand('copy');
-    window.getSelection()/*guaranteed to exist*/!.removeAllRanges();
+    if(as === 'text') { navigator.clipboard.writeText(textAreaValue); } 
+    else { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]); }
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
   }
