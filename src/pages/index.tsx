@@ -1,11 +1,13 @@
-import { Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea, useBreakpointValue } from '@chakra-ui/react';
+import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea } from '@chakra-ui/react';
 import Head from 'next/head';
-import { useState, ChangeEventHandler } from 'react';
+import { useRef, useState, ChangeEventHandler } from 'react';
 
 import { AppColors, HOVERABLE_CLASS } from '../constant';
 
 // ********************************************************************************
 // == Constant ====================================================================
+const TOAST_DURATION = 2500/*T&E*/;
+
 const buttonProps: Partial<ButtonProps> = {
   className: HOVERABLE_CLASS,
   color: AppColors.WHITE,
@@ -21,12 +23,33 @@ const containerProps: Partial<BoxProps> = {
 
 // == Component ===================================================================
 const MainPage = () => {
+  const outputDivRef = useRef<HTMLDivElement>(null/*default*/);
+  const toast = useToast();
+
   // -- State ---------------------------------------------------------------------
   const [textAreaValue, setTextAreaValue] = useState('')
 
   // -- Handler -------------------------------------------------------------------
   const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (event) =>
     setTextAreaValue(event.target.value)
+
+  const handleSetClipboard = (as: 'text' | 'html') => {
+    const { current } = outputDivRef;
+    if(!current) return/*not set yet*/;
+    if(!textAreaValue) {
+      toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
+      return/*no value*/;
+    } /* else -- value exists */
+
+    window.getSelection()/*guaranteed to exist*/!.removeAllRanges();
+    let range = document.createRange();
+    range.selectNode(current);
+    window.getSelection()/*guaranteed to exist*/!.addRange(range);
+    document.execCommand('copy');
+    window.getSelection()/*guaranteed to exist*/!.removeAllRanges();
+
+    toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
+  }
 
   // -- UI ------------------------------------------------------------------------
   return (
@@ -68,10 +91,10 @@ const MainPage = () => {
           >
             <Box {...containerProps}>
               <Center padding='2em' gap='5em'>
-                <Button {...buttonProps}>
+                <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
                   {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
                 </Button>
-                <Button {...buttonProps}>
+                <Button {...buttonProps} onClick={() => handleSetClipboard('html')}>
                   {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
                 </Button>
               </Center>
@@ -89,7 +112,7 @@ const MainPage = () => {
                 outline={`1px solid ${AppColors.WHITE_2}`}
                 borderRadius='16px'
               >
-                The copied contents will be displayed here
+                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: textAreaValue.length ? textAreaValue : '<div>The rendered Text or HTML will appear here</div>' }}/>
               </Box>
             </Box>
           </Flex>
