@@ -29,6 +29,7 @@ const buttonProps: Partial<ButtonProps> = {
 const containerProps: Partial<BoxProps> = {
   padding: '1em',
   flexBasis: '50%',
+  overflow: 'auto',
 }
 
 const tooltipProps: Partial<TooltipProps> = {
@@ -112,7 +113,7 @@ const MainPage = () => {
             flexDir={useBreakpointValue({ base: 'column', md: 'row' })}
             minHeight={useBreakpointValue({ base: '', md: '60vh' })}
           >
-            <Box {...containerProps}>
+            <Box  {...containerProps} overflow={'auto'}>
               <Center padding='2em' gap='5em'>
                 <Tooltip label='Copy the text content of the rendered HTML' {...tooltipProps}>
                   <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
@@ -131,8 +132,9 @@ const MainPage = () => {
                 height='42vh'
                 maxHeight='42vh'
                 theme='dark'
-                autoFocus={true}
                 extensions={[html()]}
+                indentWithTab={false}
+                autoFocus={true}
                 onChange={(value, viewUpdate) => {
                   const state = viewUpdate.state.toJSON(STATE_FIELDS);
 
@@ -147,7 +149,8 @@ const MainPage = () => {
             <Box {...containerProps}>
               <Box
                 padding='1em'
-                height='100%'
+                height='56vh'
+                maxHeight='56vh'
                 overflow='auto'
                 outline={`1px solid ${AppColors.WHITE_2}`}
                 borderRadius='16px'
