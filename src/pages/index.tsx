@@ -1,4 +1,4 @@
-import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea } from '@chakra-ui/react';
+import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea, Tooltip, TooltipProps } from '@chakra-ui/react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRef, useState, ChangeEventHandler } from 'react';
@@ -13,13 +13,21 @@ const buttonProps: Partial<ButtonProps> = {
   className: HOVERABLE_CLASS,
   color: AppColors.WHITE,
   backgroundColor: AppColors.PURPLE,
-  _active: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE_2 },
+  _active: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
   _hover: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
 }
 
 const containerProps: Partial<BoxProps> = {
   padding: '1em',
   flexBasis: '50%',
+}
+
+const tooltipProps: Partial<TooltipProps> = {
+  hasArrow: true,
+  placement: 'top',
+  color: AppColors.PURPLE,
+  backgroundColor: AppColors.WHITE,
+  _after: { backgroundColor: AppColors.PURPLE },
 }
 
 // == Component ===================================================================
@@ -88,12 +96,16 @@ const MainPage = () => {
           >
             <Box {...containerProps}>
               <Center padding='2em' gap='5em'>
-                <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
-                  {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
-                </Button>
-                <Button {...buttonProps} onClick={() => handleSetClipboard('html')}>
-                  {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
-                </Button>
+                <Tooltip label='Copy the text content of the rendered HTML' {...tooltipProps}>
+                  <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
+                    {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
+                  </Button>
+                </Tooltip>
+                <Tooltip label='Copy the rendered HTML' {...tooltipProps}>
+                  <Button {...buttonProps} onClick={() => handleSetClipboard('html')}>
+                    {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
+                  </Button>
+                </Tooltip>
               </Center>
               <Textarea
                 value={textAreaValue}
@@ -117,7 +129,7 @@ const MainPage = () => {
         <Center>
           <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
         </Center>
-      </Box>
+      </Box >
     </>
   )
 }
