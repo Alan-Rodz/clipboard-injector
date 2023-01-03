@@ -1,2 +1,8 @@
+/* Animation */
 .hoverable { transition: all 0.3s ease; }
 .hoverable:hover { transform: scale(1.10); }
+
+/* CodeMirror */
+.cm-editor {
+  font-size: large;
+}
