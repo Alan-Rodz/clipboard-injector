@@ -1,11 +1,12 @@
-import { format as prettierFormat } from 'prettier';
-import htmlParser from 'prettier/parser-html';
 import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Tooltip, TooltipProps } from '@chakra-ui/react';
 import { historyField } from '@codemirror/commands';
 import { html } from '@codemirror/lang-html';
 import { StateField } from '@codemirror/state';
 import CodeMirror from '@uiw/react-codemirror';
 import Head from 'next/head';
+import Link from 'next/link';
+import { format as prettierFormat } from 'prettier';
+import htmlParser from 'prettier/parser-html';
 import { useEffect, useRef, useState } from 'react';
 
 import { AppColors, HOVERABLE_CLASS } from '../constant';
@@ -49,12 +50,12 @@ const MainPage = () => {
 
   // -- State ----------------------------------------------------------------------
   const [editorValue, setEditorValue] = useState(''/*default none*/),
-        [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/});
+    [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/ });
 
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
     const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
-          editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+      editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
 
     setEditorValue(editorValue || '');
     setEditorState(editorState ? JSON.parse(editorState) : '');
@@ -63,7 +64,7 @@ const MainPage = () => {
   // TODO: move to CM, make a button
   useEffect(() => {
     const format = (e: KeyboardEvent) => {
-      if(e.key === '≥' && e.shiftKey && e.altKey) {
+      if (e.key === '≥' && e.shiftKey && e.altKey) {
         const formattedValue = prettierFormat(editorValue, { parser: 'html', plugins: [htmlParser] });
         console.log(formattedValue)
         setEditorValue(formattedValue);
@@ -176,6 +177,9 @@ const MainPage = () => {
             </Box>
           </Flex>
         </Box>
+        <Center>
+          <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
+        </Center>
       </Box >
     </>
   )
