@@ -42,7 +42,7 @@ const MainPage = () => {
       return/*no value*/;
     } /* else -- value exists */
 
-    if (as === 'text') { navigator.clipboard.writeText(textAreaValue); }
+    if (as === 'text') { navigator.clipboard.writeText(current.textContent ?? ''); }
     else { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]); }
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
