@@ -1,12 +1,20 @@
-import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Textarea, Tooltip, TooltipProps } from '@chakra-ui/react';
+import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Tooltip, TooltipProps } from '@chakra-ui/react';
+import { historyField } from '@codemirror/commands';
+import CodeMirror from '@uiw/react-codemirror';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRef, useState, ChangeEventHandler } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { AppColors, HOVERABLE_CLASS } from '../constant';
 
 // ********************************************************************************
 // == Constant ====================================================================
+// -- CodeMirror ------------------------------------------------------------------
+const STATE_FIELDS = { history: historyField };
+const LOCAL_STORAGE_EDITOR_STATE_KEY = 'editorStateValue';
+const LOCAL_STORAGE_EDITOR_VALUE_KEY = 'editorStateValue';
+
+// -- UI --------------------------------------------------------------------------
 const TOAST_DURATION = 2500/*T&E*/;
 
 const buttonProps: Partial<ButtonProps> = {
@@ -35,17 +43,24 @@ const MainPage = () => {
   const outputDivRef = useRef<HTMLDivElement>(null/*default*/);
   const toast = useToast();
 
-  // -- State ---------------------------------------------------------------------
-  const [textAreaValue, setTextAreaValue] = useState('')
+  // -- State ----------------------------------------------------------------------
+  const [editorValue, setEditorValue] = useState(''/*default none*/);
+  const [editorState, setEditorState] = useState(''/*default none*/);
+
+  // -- Effect ---------------------------------------------------------------------
+  useEffect(() => {
+    const editorStateValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+    const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY);
+
+    setEditorValue(editorValue || '');
+    setEditorState(editorStateValue ? JSON.parse(editorStateValue) : '');
+  }, []);
 
   // -- Handler -------------------------------------------------------------------
-  const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (event) =>
-    setTextAreaValue(event.target.value)
-
   const handleSetClipboard = (as: 'text' | 'html') => {
     const { current } = outputDivRef;
     if (!current) return/*not set yet*/;
-    if (!textAreaValue) {
+    if (!editorValue) {
       toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
       return/*no value*/;
     } /* else -- value exists */
@@ -91,6 +106,8 @@ const MainPage = () => {
           <Flex
             backgroundColor={AppColors.BLACK_2}
             borderRadius='16px'
+            maxHeight='60%'
+            height='100%'
             flexDir={useBreakpointValue({ base: 'column', md: 'row' })}
             minHeight={useBreakpointValue({ base: '', md: '60vh' })}
           >
@@ -107,10 +124,21 @@ const MainPage = () => {
                   </Button>
                 </Tooltip>
               </Center>
-              <Textarea
-                value={textAreaValue}
-                onChange={handleTextAreaChange}
-                height='70%'/*T&E*/
+              <CodeMirror
+                value={editorValue}
+                initialState={editorState.length && JSON.parse(editorState) ? { json: editorState, fields: STATE_FIELDS } : undefined}
+                height='42vh'
+                maxHeight='42vh'
+                theme='dark'
+                autoFocus={true}
+                onChange={(value, viewUpdate) => {
+                  const state = viewUpdate.state.toJSON(STATE_FIELDS);
+                  setEditorValue(value);
+                  setEditorState(state);
+
+                  localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
+                  localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, value);
+                }}
               />
             </Box>
             <Box {...containerProps}>
@@ -121,14 +149,11 @@ const MainPage = () => {
                 outline={`1px solid ${AppColors.WHITE_2}`}
                 borderRadius='16px'
               >
-                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: textAreaValue.length ? textAreaValue : '<div>The rendered Text or HTML will appear here</div>' }} />
+                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: editorValue.length ? editorValue : '<div>The rendered Text or HTML will appear here</div>' }} />
               </Box>
             </Box>
           </Flex>
         </Box>
-        <Center>
-          <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
-        </Center>
       </Box >
     </>
   )
