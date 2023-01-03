@@ -1,10 +1,29 @@
-import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
+import { Box, Button, ButtonProps, Center, Text, Textarea, useBreakpointValue } from '@chakra-ui/react';
 import Head from 'next/head';
+import { useState, ChangeEventHandler } from 'react';
 
-import { AppColors } from '../constant';
+import { AppColors, HOVERABLE_CLASS } from '../constant';
 
 // ********************************************************************************
+// == Constant ====================================================================
+const buttonProps: Partial<ButtonProps> = {
+  className: HOVERABLE_CLASS,
+  color: AppColors.WHITE,
+  backgroundColor: AppColors.PURPLE,
+  _active: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE_2 },
+  _hover: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
+}
+
+// == Component ===================================================================
 const MainPage = () => {
+  // -- State ---------------------------------------------------------------------
+  const [textAreaValue, setTextAreaValue] = useState('')
+
+  // -- Handler -------------------------------------------------------------------
+  const handleTextAreaChange: ChangeEventHandler<HTMLTextAreaElement> = (event) =>
+    setTextAreaValue(event.target.value)
+
+  // -- UI ------------------------------------------------------------------------
   return (
     <>
       <Head>
@@ -34,6 +53,17 @@ const MainPage = () => {
           >
             Clipboard Injector
           </Text>
+
+          <Center padding='2em' gap='5em'>
+            <Button {...buttonProps}>
+              Copy as Text
+            </Button>
+            <Button {...buttonProps}>
+              Copy as HTML
+            </Button>
+          </Center>
+
+          <Textarea value={textAreaValue} onChange={handleTextAreaChange} />
 
         </Box>
       </Box>
