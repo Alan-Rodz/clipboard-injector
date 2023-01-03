@@ -1,8 +1,9 @@
 import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Tooltip, TooltipProps } from '@chakra-ui/react';
 import { historyField } from '@codemirror/commands';
+import { html } from '@codemirror/lang-html';
+import { StateField } from '@codemirror/state';
 import CodeMirror from '@uiw/react-codemirror';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import { AppColors, HOVERABLE_CLASS } from '../constant';
@@ -11,8 +12,8 @@ import { AppColors, HOVERABLE_CLASS } from '../constant';
 // == Constant ====================================================================
 // -- CodeMirror ------------------------------------------------------------------
 const STATE_FIELDS = { history: historyField };
-const LOCAL_STORAGE_EDITOR_STATE_KEY = 'editorStateValue';
-const LOCAL_STORAGE_EDITOR_VALUE_KEY = 'editorStateValue';
+const LOCAL_STORAGE_EDITOR_STATE_KEY = 'editorState';
+const LOCAL_STORAGE_EDITOR_VALUE_KEY = 'editorValue';
 
 // -- UI --------------------------------------------------------------------------
 const TOAST_DURATION = 2500/*T&E*/;
@@ -44,16 +45,16 @@ const MainPage = () => {
   const toast = useToast();
 
   // -- State ----------------------------------------------------------------------
-  const [editorValue, setEditorValue] = useState(''/*default none*/);
-  const [editorState, setEditorState] = useState(''/*default none*/);
+  const [editorValue, setEditorValue] = useState(''/*default none*/),
+        [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/});
 
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
-    const editorStateValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
-    const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY);
+    const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
+          editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
 
     setEditorValue(editorValue || '');
-    setEditorState(editorStateValue ? JSON.parse(editorStateValue) : '');
+    setEditorState(editorState ? JSON.parse(editorState) : '');
   }, []);
 
   // -- Handler -------------------------------------------------------------------
@@ -126,18 +127,20 @@ const MainPage = () => {
               </Center>
               <CodeMirror
                 value={editorValue}
-                initialState={editorState.length && JSON.parse(editorState) ? { json: editorState, fields: STATE_FIELDS } : undefined}
+                initialState={editorState ? { json: editorState, fields: STATE_FIELDS } : undefined}
                 height='42vh'
                 maxHeight='42vh'
                 theme='dark'
                 autoFocus={true}
+                extensions={[html()]}
                 onChange={(value, viewUpdate) => {
                   const state = viewUpdate.state.toJSON(STATE_FIELDS);
+
+                  localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, value);
+                  localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
+
                   setEditorValue(value);
                   setEditorState(state);
-
-                  localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
-                  localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, value);
                 }}
               />
             </Box>
