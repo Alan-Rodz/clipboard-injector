@@ -8,6 +8,6 @@ const Document = () =>
       <Main />
       <NextScript />
     </body>
-  </Html>;
+  </Html>
 
 export default Document;

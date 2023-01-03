@@ -1,3 +1,4 @@
+import { Box } from '@chakra-ui/react';
 import Head from 'next/head';
 
 // ********************************************************************************
@@ -9,11 +10,21 @@ const MainPage = () => {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <div>
-        hello
-      </div>
+      <Box
+        position='relative'
+        width='100vw'
+        height='100vh'
+        flexDir='column'
+        justifyContent='space-between'
+        overflowX='auto'
+        overflowY='auto'
+        color={'white'}
+        backgroundColor={'black'}
+      >
+        test
+      </Box>
     </>
-  );
+  )
 }
 
 export default MainPage;
