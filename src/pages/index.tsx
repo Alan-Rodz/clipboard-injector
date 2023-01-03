@@ -1,3 +1,5 @@
+import { format as prettierFormat } from 'prettier';
+import htmlParser from 'prettier/parser-html';
 import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Tooltip, TooltipProps } from '@chakra-ui/react';
 import { historyField } from '@codemirror/commands';
 import { html } from '@codemirror/lang-html';
@@ -57,6 +59,20 @@ const MainPage = () => {
     setEditorValue(editorValue || '');
     setEditorState(editorState ? JSON.parse(editorState) : '');
   }, []);
+
+  // TODO: move to CM, make a button
+  useEffect(() => {
+    const format = (e: KeyboardEvent) => {
+      if(e.key === '≥' && e.shiftKey && e.altKey) {
+        const formattedValue = prettierFormat(editorValue, { parser: 'html', plugins: [htmlParser] });
+        console.log(formattedValue)
+        setEditorValue(formattedValue);
+      } /* else -- ignore */
+    }
+
+    document.addEventListener('keydown', format);
+    return () => document.removeEventListener('keydown', format);
+  }, [editorValue]);
 
   // -- Handler -------------------------------------------------------------------
   const handleSetClipboard = (as: 'text' | 'html') => {
