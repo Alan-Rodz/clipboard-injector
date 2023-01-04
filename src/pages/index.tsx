@@ -5,9 +5,9 @@ import { ViewUpdate } from '@codemirror/view';
 import CodeMirror from '@uiw/react-codemirror';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { format as prettierFormat } from 'prettier';
 import htmlParser from 'prettier/parser-html';
-import { useEffect, useRef, useState } from 'react';
 
 import { LOCAL_STORAGE_EDITOR_VALUE_KEY, LOCAL_STORAGE_EDITOR_STATE_KEY, STATE_FIELDS } from '../constant/codeMirror';
 import { boxProps, buttonProps, tooltipProps, AppColors, TOAST_DURATION } from '../constant/ui';
@@ -24,7 +24,7 @@ const MainPage = () => {
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
     const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
-      editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+          editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
 
     setEditorValue(editorValue || ''/*default*/);
     setEditorState(editorState ? JSON.parse(editorState) : {/*default*/ });
@@ -33,20 +33,20 @@ const MainPage = () => {
   // -- Handler -------------------------------------------------------------------
   const handleSetClipboard = (as: 'text' | 'html') => {
     const { current } = outputDivRef;
-    if (!current) return/*not set yet*/;
-    if (!editorValue) {
+    if(!current) return/*not set yet*/;
+    if(!editorValue) {
       toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
       return/*nothing to do*/;
     } /* else -- value exists */
 
-    if (as === 'text') navigator.clipboard.writeText(current.textContent ?? '');
+    if(as === 'text') navigator.clipboard.writeText(current.textContent ?? '');
     else navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]);
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
   }
 
   const handleFormat = () => {
-    if (!editorValue) {
+    if(!editorValue) {
       toast({ description: 'No value to format', status: 'error', duration: TOAST_DURATION });
       return/*no value*/;
     } /* else -- value exists */
