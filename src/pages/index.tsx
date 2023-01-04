@@ -19,15 +19,16 @@ const MainPage = () => {
 
   // -- State ----------------------------------------------------------------------
   const [editorValue, setEditorValue] = useState(''/*default*/),
-    [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default*/ });
+        [editorState, setEditorState] = useState<Record<string, StateField<unknown>>>({/*default*/});
 
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
     const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
           editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+    if(!editorValue || !editorState) return/*nothing to do*/;
 
     setEditorValue(editorValue || ''/*default*/);
-    setEditorState(editorState ? JSON.parse(editorState) : {/*default*/ });
+    setEditorState(JSON.parse(editorState));
   }, []);
 
   // -- Handler -------------------------------------------------------------------
@@ -130,7 +131,7 @@ const MainPage = () => {
               </Center>
               <CodeMirror
                 value={editorValue}
-                initialState={editorState ? { json: editorState, fields: STATE_FIELDS } : undefined/*no initial state*/}
+                initialState={Object.keys(editorState).length ? { json: editorState, fields: STATE_FIELDS } : undefined/*no initial state to load*/}
                 height='42vh'
                 maxHeight='42vh'
                 theme='dark'
