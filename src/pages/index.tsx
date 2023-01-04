@@ -156,7 +156,7 @@ const MainPage = () => {
         </Box>
         <Center flexDir='column' marginBottom='1em'>
           <Text marginBottom='1em'>A tool to set the contents of the clipboard explicitly</Text>
-          <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
+          <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> on GitHub</Text>
         </Center>
       </Box >
     </>
