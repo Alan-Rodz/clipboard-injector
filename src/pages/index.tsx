@@ -112,7 +112,7 @@ const MainPage = () => {
           >
             <Box  {...boxProps} overflow={'auto'}>
               <Center padding='2em' justifyContent='space-between'>
-                <Tooltip label='Format the Input HTML' {...tooltipProps}>
+                <Tooltip label='Format the Input as HTML' {...tooltipProps}>
                   <Button {...buttonProps} onClick={() => handleFormat()}>
                     Format
                   </Button>
