@@ -1,3 +1,14 @@
+/* == General ================================================================== */
+/* Default Chrome styles for UL and OL */
+ul, ol {
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding-inline-start: 40px;
+}
+
 /* == Animation ================================================================ */
 .hoverable { transition: all 0.3s ease; }
 .hoverable:hover { transform: scale(1.10); }
