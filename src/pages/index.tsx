@@ -2,6 +2,7 @@ import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Cente
 import { historyField } from '@codemirror/commands';
 import { html } from '@codemirror/lang-html';
 import { StateField } from '@codemirror/state';
+import { ViewUpdate } from '@codemirror/view';
 import CodeMirror from '@uiw/react-codemirror';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -50,36 +51,22 @@ const MainPage = () => {
 
   // -- State ----------------------------------------------------------------------
   const [editorValue, setEditorValue] = useState(''/*default none*/),
-    [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/ });
+        [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/ });
 
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
     const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
-      editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+          editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
 
     setEditorValue(editorValue || '');
     setEditorState(editorState ? JSON.parse(editorState) : '');
   }, []);
 
-  // TODO: move to CM, make a button
-  useEffect(() => {
-    const format = (e: KeyboardEvent) => {
-      if (e.key === '≥' && e.shiftKey && e.altKey) {
-        const formattedValue = prettierFormat(editorValue, { parser: 'html', plugins: [htmlParser] });
-        console.log(formattedValue)
-        setEditorValue(formattedValue);
-      } /* else -- ignore */
-    }
-
-    document.addEventListener('keydown', format);
-    return () => document.removeEventListener('keydown', format);
-  }, [editorValue]);
-
   // -- Handler -------------------------------------------------------------------
   const handleSetClipboard = (as: 'text' | 'html') => {
     const { current } = outputDivRef;
-    if (!current) return/*not set yet*/;
-    if (!editorValue) {
+    if(!current) return/*not set yet*/;
+    if(!editorValue) {
       toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
       return/*no value*/;
     } /* else -- value exists */
@@ -88,6 +75,26 @@ const MainPage = () => {
     else { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]); }
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
+  }
+
+  const handleFormat = () => {
+    if(!editorValue) {
+      toast({ description: 'No value to format', status: 'error', duration: TOAST_DURATION });
+      return/*no value*/;
+    } /* else -- value exists */
+
+    const formattedValue = prettierFormat(editorValue, { parser: 'html', plugins: [htmlParser] });
+    setEditorValue(formattedValue);
+  }
+
+  const handleCodeMirrorChange = (editorValue: string, viewUpdate: ViewUpdate) => {
+    const state = viewUpdate.state.toJSON(STATE_FIELDS);
+
+    localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, editorValue);
+    localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
+
+    setEditorValue(editorValue);
+    setEditorState(state);
   }
 
   // -- UI ------------------------------------------------------------------------
@@ -112,26 +119,29 @@ const MainPage = () => {
         <Box padding='2em'>
           <Text
             padding='0.25em'
-            backgroundColor={AppColors.PURPLE}
-            borderRadius='16px'
             width='fit-content'
-            fontSize={useBreakpointValue({ base: '1.5em', md: '2.5em' })}
+            borderRadius='16px'
+            backgroundColor={AppColors.PURPLE}
             fontWeight='bold'
+            fontSize={useBreakpointValue({ base: '1.5em', md: '2.5em' })}
           >
             Clipboard Injector
           </Text>
         </Box>
-        <Box padding='2em'>
+        <Box padding='1em'>
           <Flex
-            backgroundColor={AppColors.BLACK_2}
-            borderRadius='16px'
-            maxHeight='60%'
-            height='100%'
             flexDir={useBreakpointValue({ base: 'column', md: 'row' })}
             minHeight={useBreakpointValue({ base: '', md: '60vh' })}
+            maxHeight='60%'
+            height='100%'
+            backgroundColor={AppColors.BLACK_2}
+            borderRadius='16px'
           >
             <Box  {...containerProps} overflow={'auto'}>
-              <Center padding='2em' gap='5em'>
+              <Center padding='2em' justifyContent='space-between'>
+                <Button {...buttonProps} onClick={() => handleFormat()}>
+                  {useBreakpointValue({ base: 'Format', md: 'Format input HTML' })}
+                </Button>
                 <Tooltip label='Copy the text content of the rendered HTML' {...tooltipProps}>
                   <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
                     {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
@@ -145,22 +155,14 @@ const MainPage = () => {
               </Center>
               <CodeMirror
                 value={editorValue}
-                initialState={editorState ? { json: editorState, fields: STATE_FIELDS } : undefined}
+                initialState={editorState ? { json: editorState, fields: STATE_FIELDS } : undefined/*no initial state*/}
                 height='42vh'
                 maxHeight='42vh'
                 theme='dark'
                 extensions={[html()]}
                 indentWithTab={false}
                 autoFocus={true}
-                onChange={(value, viewUpdate) => {
-                  const state = viewUpdate.state.toJSON(STATE_FIELDS);
-
-                  localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, value);
-                  localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
-
-                  setEditorValue(value);
-                  setEditorState(state);
-                }}
+                onChange={(value, viewUpdate) => handleCodeMirrorChange(value, viewUpdate)}
               />
             </Box>
             <Box {...containerProps}>
@@ -172,12 +174,13 @@ const MainPage = () => {
                 outline={`1px solid ${AppColors.WHITE_2}`}
                 borderRadius='16px'
               >
-                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: editorValue.length ? editorValue : '<div>The rendered Text or HTML will appear here</div>' }} />
+                <div ref={outputDivRef} style={{ all: 'revert'/*remove all styles*/ }} dangerouslySetInnerHTML={{ __html: editorValue.length ? editorValue : '<div>The rendered HTML will appear here</div>' }} />
               </Box>
             </Box>
           </Flex>
         </Box>
-        <Center marginBottom='1em'>
+        <Center flexDir='column' marginBottom='1em'>
+          <Text marginBottom='1em'>A tool to set the contents of the clipboard explicitly</Text>
           <Text>See the <Link href='https://github.com/Alan-Rodz/clipboard-injector' style={{ textDecoration: 'underline' }}>source code</Link> in GitHub</Text>
         </Center>
       </Box >
