@@ -1,5 +1,4 @@
-import { useBreakpointValue, useToast, Box, BoxProps, Button, ButtonProps, Center, Flex, Text, Tooltip, TooltipProps } from '@chakra-ui/react';
-import { historyField } from '@codemirror/commands';
+import { useBreakpointValue, useToast, Box, Button, Center, Flex, Text, Tooltip } from '@chakra-ui/react';
 import { html } from '@codemirror/lang-html';
 import { StateField } from '@codemirror/state';
 import { ViewUpdate } from '@codemirror/view';
@@ -10,75 +9,44 @@ import { format as prettierFormat } from 'prettier';
 import htmlParser from 'prettier/parser-html';
 import { useEffect, useRef, useState } from 'react';
 
-import { AppColors, HOVERABLE_CLASS } from '../constant';
+import { LOCAL_STORAGE_EDITOR_VALUE_KEY, LOCAL_STORAGE_EDITOR_STATE_KEY, STATE_FIELDS } from '../constant/codeMirror';
+import { boxProps, buttonProps, tooltipProps, AppColors, TOAST_DURATION } from '../constant/ui';
 
 // ********************************************************************************
-// == Constant ====================================================================
-// -- CodeMirror ------------------------------------------------------------------
-const STATE_FIELDS = { history: historyField };
-const LOCAL_STORAGE_EDITOR_STATE_KEY = 'editorState';
-const LOCAL_STORAGE_EDITOR_VALUE_KEY = 'editorValue';
-
-// -- UI --------------------------------------------------------------------------
-const TOAST_DURATION = 2500/*T&E*/;
-
-const buttonProps: Partial<ButtonProps> = {
-  className: HOVERABLE_CLASS,
-  color: AppColors.WHITE,
-  backgroundColor: AppColors.PURPLE,
-  _active: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
-  _hover: { color: AppColors.PURPLE, backgroundColor: AppColors.WHITE },
-}
-
-const containerProps: Partial<BoxProps> = {
-  padding: '1em',
-  flexBasis: '50%',
-  overflow: 'auto',
-}
-
-const tooltipProps: Partial<TooltipProps> = {
-  hasArrow: true,
-  placement: 'top',
-  color: AppColors.PURPLE,
-  backgroundColor: AppColors.WHITE,
-  _after: { backgroundColor: AppColors.PURPLE },
-}
-
-// == Component ===================================================================
 const MainPage = () => {
   const outputDivRef = useRef<HTMLDivElement>(null/*default*/);
   const toast = useToast();
 
   // -- State ----------------------------------------------------------------------
-  const [editorValue, setEditorValue] = useState(''/*default none*/),
-        [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default empty*/ });
+  const [editorValue, setEditorValue] = useState(''/*default*/),
+    [editorState, setEditorState] = useState<Record<string, StateField<any>>>({/*default*/ });
 
   // -- Effect ---------------------------------------------------------------------
   useEffect(() => {
     const editorValue = localStorage.getItem(LOCAL_STORAGE_EDITOR_VALUE_KEY),
-          editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
+      editorState = localStorage.getItem(LOCAL_STORAGE_EDITOR_STATE_KEY);
 
-    setEditorValue(editorValue || '');
-    setEditorState(editorState ? JSON.parse(editorState) : '');
+    setEditorValue(editorValue || ''/*default*/);
+    setEditorState(editorState ? JSON.parse(editorState) : {/*default*/ });
   }, []);
 
   // -- Handler -------------------------------------------------------------------
   const handleSetClipboard = (as: 'text' | 'html') => {
     const { current } = outputDivRef;
-    if(!current) return/*not set yet*/;
-    if(!editorValue) {
+    if (!current) return/*not set yet*/;
+    if (!editorValue) {
       toast({ description: 'No value to copy', status: 'error', duration: TOAST_DURATION });
-      return/*no value*/;
+      return/*nothing to do*/;
     } /* else -- value exists */
 
-    if (as === 'text') { navigator.clipboard.writeText(current.textContent ?? ''); }
-    else { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]); }
+    if (as === 'text') navigator.clipboard.writeText(current.textContent ?? '');
+    else navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([current.innerHTML], { type: 'text/html' }) })]);
 
     toast({ description: `Copied as ${as === 'text' ? 'Text' : 'HTML'}`, status: 'success', duration: TOAST_DURATION })
   }
 
   const handleFormat = () => {
-    if(!editorValue) {
+    if (!editorValue) {
       toast({ description: 'No value to format', status: 'error', duration: TOAST_DURATION });
       return/*no value*/;
     } /* else -- value exists */
@@ -90,8 +58,12 @@ const MainPage = () => {
   const handleCodeMirrorChange = (editorValue: string, viewUpdate: ViewUpdate) => {
     const state = viewUpdate.state.toJSON(STATE_FIELDS);
 
-    localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, editorValue);
-    localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(LOCAL_STORAGE_EDITOR_VALUE_KEY, editorValue);
+      localStorage.setItem(LOCAL_STORAGE_EDITOR_STATE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Failed to save to local storage', error);
+    }
 
     setEditorValue(editorValue);
     setEditorState(state);
@@ -137,16 +109,19 @@ const MainPage = () => {
             backgroundColor={AppColors.BLACK_2}
             borderRadius='16px'
           >
-            <Box  {...containerProps} overflow={'auto'}>
+            <Box  {...boxProps} overflow={'auto'}>
               <Center padding='2em' justifyContent='space-between'>
-                <Button {...buttonProps} onClick={() => handleFormat()}>
-                  {useBreakpointValue({ base: 'Format', md: 'Format input HTML' })}
-                </Button>
+                <Tooltip label='Format the Input HTML' {...tooltipProps}>
+                  <Button {...buttonProps} onClick={() => handleFormat()}>
+                    Format
+                  </Button>
+                </Tooltip>
                 <Tooltip label='Copy the text content of the rendered HTML' {...tooltipProps}>
                   <Button {...buttonProps} onClick={() => handleSetClipboard('text')}>
                     {useBreakpointValue({ base: 'Text', md: 'Copy as Text' })}
                   </Button>
                 </Tooltip>
+
                 <Tooltip label='Copy the rendered HTML' {...tooltipProps}>
                   <Button {...buttonProps} onClick={() => handleSetClipboard('html')}>
                     {useBreakpointValue({ base: 'HTML', md: 'Copy as HTML' })}
@@ -165,7 +140,7 @@ const MainPage = () => {
                 onChange={(value, viewUpdate) => handleCodeMirrorChange(value, viewUpdate)}
               />
             </Box>
-            <Box {...containerProps}>
+            <Box {...boxProps}>
               <Box
                 padding='1em'
                 height='56vh'
